@@ -10,7 +10,7 @@ I created this tool to implement the parts that I need regularly in deployment a
 Use [Go](https://golang.org/) CLI tools to install:
 
 ```
-go get github.com/lepovirta/netlify-deployer
+go get gitlab.com/lepovirta/netlify-deployer
 ```
 
 ## Usage
