@@ -12,12 +12,13 @@ import (
 )
 
 type config struct {
-	AuthToken string `envconfig:"auth_token" required:"true"`
-	SiteID    string `envconfig:"site_id" required:"true"`
-	Directory string `required:"true"`
-	Draft     bool   `default:"true"`
-	LogLevel  string `default:"warn"`
-	LogFormat string `default:"text"`
+	AuthToken     string `envconfig:"auth_token" required:"true"`
+	SiteID        string `envconfig:"site_id" required:"true"`
+	Directory     string `required:"true"`
+	Draft         bool   `default:"true"`
+	DeployMessage string `default:""`
+	LogLevel      string `default:"warn"`
+	LogFormat     string `default:"text"`
 }
 
 func (c *config) readFromEnv() error {
@@ -48,6 +49,7 @@ func main() {
 		SiteID:  c.SiteID,
 		Dir:     c.Directory,
 		IsDraft: c.Draft,
+		Title:   c.DeployMessage,
 	}, nil)
 	if err != nil {
 		logger.Fatalf("failed to deploy site: %s", err)
