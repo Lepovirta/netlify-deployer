@@ -1,30 +1,51 @@
+include:
+- template: Dependency-Scanning.gitlab-ci.yml
+
 image: golang:1.14
 
 stages:
+- prepare
+- test
 - build
-
-cache:
-  key: yup
-  paths:
-  - /go/pkg
 
 workflow:
   rules:
   - if: $CI_MERGE_REQUEST_ID
   - if: $CI_COMMIT_BRANCH == "master"
 
+variables:
+  GOPATH: $CI_PROJECT_DIR/.go
+
 before_script:
-- go mod download
+- mkdir -p .go/pkg/mod
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+  - .go/pkg/mod/
+
+gomod:
+  stage: prepare
+  script:
+  - go mod download
 
 lint:
-  stage: build
+  stage: test
+  needs:
+  - gomod
   image: golangci/golangci-lint:v1.27.0
   script:
   - golangci-lint run -v
 
 build:
   stage: build
+  needs:
+  - gomod
   variables:
     CGO_ENABLED: "0"
   script:
   - go build -o netlify-deployer
+  artifacts:
+    paths:
+    - netlify-deployer
+    expire_in: 1 days
