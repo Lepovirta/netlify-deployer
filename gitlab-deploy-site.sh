@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GITLAB_BASE_URL="https://gitlab.com/api/v4"
-GITLAB_PROJECT_URL="${GITLAB_BASE_URL}/projects/${CI_PROJECT_ID}"
-GITLAB_MR_URL="${GITLAB_PROJECT_URL}/merge_requests/${CI_MERGE_REQUEST_IID}"
-
 # Disable drafts for main branch only
 NETLIFY_MAIN_BRANCH="${NETLIFY_MAIN_BRANCH:-"master"}"
 NETLIFY_DRAFT="true"
@@ -31,6 +27,7 @@ NETLIFY_DEPLOYMESSAGE="${BRANCH_NAME}/${GIT_HASH}"
 export NETLIFY_DRAFT NETLIFY_DEPLOYMESSAGE
 
 should_post_comment() {
+    [ -z "${DISABLE_MR_COMMENT:-}" ] && \
     [ -n "${CI_MERGE_REQUEST_IID:-}" ] && \
     [ -n "${GITLAB_ACCESS_TOKEN}" ]
 }
@@ -40,6 +37,10 @@ mr_message_template() {
 }
 
 post_comment() {
+    local base_url="https://gitlab.com/api/v4"
+    local project_url="${base_url}/projects/${CI_PROJECT_ID}"
+    local mr_url="${project_url}/merge_requests/${CI_MERGE_REQUEST_IID}"
+
     curl \
         -sfSL \
         --retry 3 \
@@ -48,7 +49,7 @@ post_comment() {
         --request POST \
         --header "Private-Token: $GITLAB_ACCESS_TOKEN" \
         --data-urlencode body@- \
-        "${GITLAB_MR_URL}/notes" >/dev/null
+        "${mr_url}/notes" >/dev/null
 }
 
 main() {
