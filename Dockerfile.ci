@@ -1,0 +1,11 @@
+# Produces an image that is easy to use
+# in CI pipelines such as Gitlab CI
+FROM debian:10-slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+    && rm -rf /var/lib/apt/lists/*
+COPY netlify-deployer /usr/local/bin/netlify-deployer
+COPY gitlab-deploy-site.sh /usr/local/bin/gitlab-deploy-site

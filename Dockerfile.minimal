@@ -1,0 +1,5 @@
+# Produces an image that contains only
+# the bare minimum needed to run netlify-deployer
+FROM gcr.io/distroless/base-debian10
+COPY netlify-deployer /usr/local/bin/netlify-deployer
+ENTRYPOINT ["netlify-deployer"]

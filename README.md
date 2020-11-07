@@ -31,6 +31,69 @@ The tool uses these environment variables:
 
 The tool prints out the unique URL for the deployment, which you can use to view site.
 
+## Docker images
+
+Docker images for this tool are hosted in the [Gitlab Container Registry](https://gitlab.com/lepovirta/netlify-deployer/container_registry).
+This is the name of the image that is available
+
+```
+registry.gitlab.com/lepovirta/netlify-deployer
+```
+
+The image has the following tags available:
+
+* `latest`: Latest version from the master branch with just the netlify-deployer binary included (i.e. `Dockerfile.minimal`)
+* `ci`: Latest version from the master branch with the netlify-deployer binary and additional tools useful with CI platforms such as Gitlab CI (i.e. `Dockerfile.ci`)
+
+## Integration with Gitlab CI
+
+Here's how you can deploy your site from Gitlab CI to Netlify using the `netlify-deployer` Docker image.
+This integration does the following:
+
+* Publish your site when running the pipeline on master branch
+* Publish a draft site when running the pipeline on any other branch
+* Post a link to your merge requests when the draft site is available (requires a Gitlab access token)
+
+First, set up your Netlify access credentials in your repository's CI/CD settings:
+
+1. Go to your repository page in Gitlab
+2. Go to `Settings` > `CI / CD` > `Variables`
+3. Add a new variable `NETLIFY_SITE_ID` and use your Netlify site's ID as the value
+4. Add a new variable `NETLIFY_AUTH_TOKEN` and use your [Netlify access token](https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui) as the value
+5. (Optional) If you want to post draft links to your merge requests, you need to also add a new variable `GITLAB_ACCESS_TOKEN` and use a Gitlab access token as the value
+
+Next, your `.gitlab-ci.yml` should be made to look something like this:
+
+```yaml
+stages:
+- # Other stages go here
+- build-site
+- publish-site
+
+variables:
+  # You can use whatever directory here you want.
+  NETLIFY_DIRECTORY: public
+
+build-site:
+  stage: build-site
+  script:
+  - # Use whatever commands you need here to generate your site.
+  - # Place the site to $NETLIFY_DIRECTORY
+  artifacts:
+    paths:
+    - $NETLIFY_DIRECTORY
+
+# You can run this same job in both master and MR branches.
+# It will automatically publish the site as a draft when run on non-master branches.
+# If you want to publish your site on another branch other than master,
+# set the variable NETLIFY_MAIN_BRANCH to point to some other branch.
+publish-site:
+  stage: publish-site
+  image: registry.gitlab.com/lepovirta/netlify-deployer:ci
+  script:
+  - gitlab-deploy-site
+```
+
 ## Building
 
 Make sure you have [Go 1.13+](https://golang.org/dl/) installed.
@@ -42,6 +105,13 @@ go build
 ```
 
 This should produce an executable binary called `netlify-deployer`.
+
+After you've built the app, you can build your own Docker image using the Dockerfiles in the repository:
+
+```
+docker build -f Dockerfile.ci -t netlify-deployer-ci .
+docker build -f Dockerfile.minimal -t netlify-deployer .
+```
 
 ## License
 
