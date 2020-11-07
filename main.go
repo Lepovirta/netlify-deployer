@@ -1,13 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	oapiclient "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/kelseyhightower/envconfig"
 	netlify "github.com/netlify/open-api/go/porcelain"
-	"github.com/netlify/open-api/go/porcelain/context"
+	ooapicontext "github.com/netlify/open-api/go/porcelain/context"
 	"github.com/sirupsen/logrus"
 )
 
@@ -86,10 +87,9 @@ func setupNetlifyClient(c *config) *netlify.Netlify {
 	return netlify.NewHTTPClient(formats)
 }
 
-func setupContext(c *config, logger *logrus.Logger) context.Context {
-	var ctx context.Context
-	ctx = context.WithLogger(ctx, logger.WithFields(logrus.Fields{
+func setupContext(c *config, logger *logrus.Logger) ooapicontext.Context {
+	ctx := ooapicontext.WithLogger(context.Background(), logger.WithFields(logrus.Fields{
 		"source": "netlify",
 	}))
-	return context.WithAuthInfo(ctx, oapiclient.BearerToken(c.AuthToken))
+	return ooapicontext.WithAuthInfo(ctx, oapiclient.BearerToken(c.AuthToken))
 }
