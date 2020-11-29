@@ -9,9 +9,9 @@ image: golang:1.15
 
 stages:
 - prepare
-- test
 - build
 - docker-build
+- test
 - docker-release
 
 workflow:
@@ -38,15 +38,6 @@ gomod:
   extends: .go-cache
   script:
   - go mod download
-
-lint:
-  stage: test
-  extends: .go-cache
-  needs:
-  - gomod
-  image: golangci/golangci-lint:v1.27.0
-  script:
-  - golangci-lint run -v
 
 build:
   stage: build
@@ -89,6 +80,15 @@ build-image-ci:
   variables:
     DOCKERFILE: Dockerfile.ci
     CONTAINER_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-ci"
+
+lint:
+  stage: test
+  extends: .go-cache
+  needs:
+  - gomod
+  image: golangci/golangci-lint:v1.27.0
+  script:
+  - golangci-lint run -v
 
 .docker-publish-job:
   stage: docker-release
