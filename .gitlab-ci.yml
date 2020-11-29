@@ -21,6 +21,7 @@ workflow:
 
 variables:
   GOPATH: $CI_PROJECT_DIR/.go
+  CI_APPLICATION_REPOSITORY: $CI_REGISTRY_IMAGE
 
 .go-cache:
   variables:
