@@ -94,6 +94,8 @@ publish-site:
   - gitlab-deploy-site
 ```
 
+For a more detailed guide, see this blog post: [Website previews for custom Netlify deployments using GitLab CI](https://lepovirta.org/posts/2021-03-28-website-previews-for-custom-netlify-deployments-using-gitlab-ci.html)
+
 ## Building
 
 Make sure you have [Go 1.13+](https://golang.org/dl/) installed.
